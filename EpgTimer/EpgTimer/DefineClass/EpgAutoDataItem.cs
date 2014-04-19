@@ -183,6 +183,88 @@ namespace EpgTimer
             }
         }
 
+        public void GetSearchItemList(ref List<SearchItem> itemlist)
+        {
+
+            if (EpgAutoAddInfo == null) return;
+
+            CtrlCmdUtil cmd = CommonManager.Instance.CtrlCmd;
+
+            EpgSearchKeyInfo key = new EpgSearchKeyInfo();
+            EpgSearchKeyInfo key2 = this.EpgAutoAddInfo.searchInfo;
+            //代入すると参照コピーになり、「検索無効」が消去されてしまう。
+            //条件保存して後で復元するのは、エラー時に対応出来ないのでNG。
+            //何とも美しくないが。
+            key.aimaiFlag=key2.aimaiFlag;
+            key.andKey=key2.andKey;
+            key.audioList=key2.audioList;
+            key.chkRecDay=key2.chkRecDay;
+            key.chkRecEnd=key2.chkRecEnd;
+            key.contentList=key2.contentList;
+            key.dateList=key2.dateList;
+            key.freeCAFlag=key2.freeCAFlag;
+            key.notContetFlag=key2.notContetFlag;
+            key.notDateFlag=key2.notDateFlag;
+            key.notKey=key2.notKey;
+            key.regExpFlag=key2.regExpFlag;
+            key.serviceList=key2.serviceList;
+            key.titleOnlyFlag=key2.titleOnlyFlag;
+            key.videoList=key2.videoList;
+
+            key.andKey = key.andKey.Substring(key.andKey.StartsWith("^!{999}") ? 7 : 0);
+
+            List<EpgEventInfo> list = new List<EpgEventInfo>();
+            List<EpgSearchKeyInfo> keyList = new List<EpgSearchKeyInfo>();
+            keyList.Add(key);
+            
+            try
+            {
+                cmd.SendSearchPg(keyList, ref list);
+
+                foreach (EpgEventInfo info in list)
+                {
+                    SearchItem item = new SearchItem();
+                    item.EventInfo = info;
+
+                    if (info.start_time.AddSeconds(info.durationSec) > DateTime.Now)
+                    {
+                        //予約情報との突き合わせ
+                        foreach (ReserveData info2 in CommonManager.Instance.DB.ReserveList.Values)
+                        {
+                            if (info.original_network_id == info2.OriginalNetworkID &&
+                                info.transport_stream_id == info2.TransportStreamID &&
+                                info.service_id == info2.ServiceID &&
+                                info.event_id == info2.EventID)
+                            {
+                                item.ReserveInfo = info2;
+                                break;
+                            }
+                        }
+                        UInt64 serviceKey = CommonManager.Create64Key(info.original_network_id, info.transport_stream_id, info.service_id);
+                        if (ChSet5.Instance.ChList.ContainsKey(serviceKey) == true)
+                        {
+                            item.ServiceName = ChSet5.Instance.ChList[serviceKey].ServiceName;
+                        }
+
+                        //これはSearchWindow用の固有コードと考える
+                        //if (Settings.Instance.FixSearchResult)
+                        //{
+                        //    item.EventInfo.ShortInfo.text_char = "省略";
+                        //}
+
+                        itemlist.Add(item);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message + "\r\n" + ex.StackTrace);
+            }
+
+            return;
+
+        }
+
         public String JyanruKey
         {
             get
