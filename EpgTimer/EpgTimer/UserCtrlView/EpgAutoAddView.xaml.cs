@@ -197,7 +197,7 @@ namespace EpgTimer
             if (listView_key.SelectedItems.Count == 0) { return; }
 
             string text1 = "予約項目ごと削除してよろしいですか?\r\n"
-                            + "(無効の「自動予約登録項目」による予約も削除されます。)";
+                            + "(無効の「自動予約登録項目」による予約は削除されません。)";
             string caption1 = "削除(予約ごと削除)の確認";
             if (MessageBox.Show(text1, caption1, MessageBoxButton.OKCancel, 
                 MessageBoxImage.Exclamation, MessageBoxResult.OK) != MessageBoxResult.OK)
