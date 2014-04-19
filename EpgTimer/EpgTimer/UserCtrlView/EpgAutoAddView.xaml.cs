@@ -192,6 +192,59 @@ namespace EpgTimer
             }
         }
 
+        private void button_del2_Click(object sender, RoutedEventArgs e)
+        {
+            if (listView_key.SelectedItems.Count == 0) { return; }
+
+            string text1 = "予約項目ごと削除してよろしいですか?\r\n"
+                            + "(無効の「自動予約登録項目」による予約も削除されます。)";
+            string caption1 = "削除(予約ごと削除)の確認";
+            if (MessageBox.Show(text1, caption1, MessageBoxButton.OKCancel, 
+                MessageBoxImage.Exclamation, MessageBoxResult.OK) != MessageBoxResult.OK)
+            {
+                return;
+            }
+
+            try
+            {
+                List<UInt32> list = new List<UInt32>();
+
+                foreach (EpgAutoDataItem info in listView_key.SelectedItems)
+                {
+                    if (info.KeyEnabled == "はい")
+                    {
+                        List<SearchItem> itemlist = new List<SearchItem>();
+                        info.GetSearchItemList(ref itemlist);
+
+                        foreach (SearchItem item in itemlist)
+                        {
+                            if (item.IsReserved == true)
+                            {
+                                if (list.Contains(item.ReserveInfo.ReserveID) == false)
+                                {
+                                    list.Add(item.ReserveInfo.ReserveID);
+                                }
+                            }
+                        }
+                    }
+                }
+
+                if (list.Count > 0)
+                {
+                    cmd.SendDelReserve(list);
+                    CommonManager.Instance.DB.SetUpdateNotify((UInt32)UpdateNotifyItem.ReserveInfo);
+                    CommonManager.Instance.DB.ReloadReserveInfo();
+                }
+                //
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message + "\r\n" + ex.StackTrace);
+            }
+
+            button_del_Click(sender, e);
+        }
+
         private void button_change_Click(object sender, RoutedEventArgs e)
         {
             try
