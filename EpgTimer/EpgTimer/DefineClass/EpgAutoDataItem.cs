@@ -307,7 +307,7 @@ namespace EpgTimer
                 //列項目1個表示されるごとにEpgAutoDataItemが生成されるため、itemCountsでの保持も役に立たず。
                 //結果の数字だけ返すメソッドをcmdに追加して(通信量削減)、結果を外部保存すれば(通信回数削減)、
                 //待ち時間を10分の1くらいには出来そうだが‥そのくらいなら元クラスを変更した方がいいかも？
-                getSearchItemList(ref itemlist); 
+                GetSearchItemList(ref itemlist); 
 
                 itemCounts[(int)itemCountsMode.Search] = (uint)itemlist.Count;
 
@@ -336,8 +336,10 @@ namespace EpgTimer
             return itemCounts[(int)Mode];
         }
 
-        private void getSearchItemList(ref List<SearchItem> itemlist)
+        public void GetSearchItemList(ref List<SearchItem> itemlist)
         {
+
+            if (EpgAutoAddInfo == null) return;
 
             CtrlCmdUtil cmd = CommonManager.Instance.CtrlCmd;
 
@@ -391,6 +393,18 @@ namespace EpgTimer
                                 break;
                             }
                         }
+                        UInt64 serviceKey = CommonManager.Create64Key(info.original_network_id, info.transport_stream_id, info.service_id);
+                        if (ChSet5.Instance.ChList.ContainsKey(serviceKey) == true)
+                        {
+                            item.ServiceName = ChSet5.Instance.ChList[serviceKey].ServiceName;
+                        }
+
+                        //これはSearchWindow用の固有コードと考える
+                        //if (Settings.Instance.FixSearchResult)
+                        //{
+                        //    item.EventInfo.ShortInfo.text_char = "省略";
+                        //}
+
                         itemlist.Add(item);
                     }
                 }
@@ -400,23 +414,9 @@ namespace EpgTimer
                 MessageBox.Show(ex.Message + "\r\n" + ex.StackTrace);
             }
 
-            //テストコード
-            //SearchItem item1 = new SearchItem();
-            //SearchItem item2 = new SearchItem();
-            //SearchItem item3 = new SearchItem();
-            //SearchItem item4 = new SearchItem();
-            //itemlist.Add(item1);
-            //itemlist.Add(item2);
-            //item3.ReserveInfo = new ReserveData();
-            //itemlist.Add(item3);
-            //item4.ReserveInfo = new ReserveData();
-            //item4.ReserveInfo.RecSetting.RecMode = 5;
-            //itemlist.Add(item4);
             return;
 
         }
-
-        //ここまで追加カウント関係のコード
 
         public String JyanruKey
         {
