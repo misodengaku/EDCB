@@ -1,3 +1,5 @@
+※このREADMEはfork元のxtne6f氏が作成されたもの(2014/04/15 work-plus-140419付属)です。
+
 EpgDataCap_Bon
 ==============
 **BonDriver based multifunctional EPG software**
