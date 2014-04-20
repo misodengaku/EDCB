@@ -21,30 +21,14 @@ namespace EpgTimer
     {
         public EpgAutoDataItem(EpgAutoAddData item)
         {
-            //this.pEpgAutoAddInfo=item;ではisChangeが動かないので×。
             this.EpgAutoAddInfo = item;
         }
 
         public EpgAutoAddData EpgAutoAddInfo
         {
-            //元コード。class EpgAutoAddData(CtrlCmdCLI)側で実装するなら元のままで良い。
-            //get;
-            //set;
-
-            //クラス内で実装する場合用の定義。変更を検知する。
-            get
-            {
-                return this.pEpgAutoAddInfo;
-            }
-            set
-            {
-                isChange = true;
-                this.pEpgAutoAddInfo = value;
-            }
+            get;
+            set;
         }
-
-        //クラス内で実装する場合用の定義。
-        private EpgAutoAddData pEpgAutoAddInfo;
 
         public String AndKey
         {
@@ -199,223 +183,70 @@ namespace EpgTimer
             }
         }
 
-        //ここから追加カウント関係のコード。
-        //本体側では問題無いが、リモートのNWでは
-        //class EpgAutoAddData(CtrlCmdCLI)側で実装しない限り、重すぎて実用は無理ぽい。
-        
         //詳細ウィンドウを開いたときの項目数と同じもの。
         //無効時でも有効時のAddCountと同じ数字が入る。
         public String SearchCount 
         {
             get
             {
-                return getItemCounts(itemCountsMode.Search).ToString();
-                //元クラスを変更する場合
-                //String view = "0";
-                //if (EpgAutoAddInfo != null)
-                //{
-                //    view = EpgAutoAddInfo.searchCount.ToString(); 
-                //}
-                //return view;
+                String view = "0";
+                if (EpgAutoAddInfo != null)
+                {
+                    view = CommonManager.Instance.DB.GetEpgAutoAddDataAppend(EpgAutoAddInfo).SearchCount.ToString();
+                }
+                return view;
             }
         }
+
         //"SearchCount"のうち、予約アイテム数
         //検索の無効・有効によってAddCountやSearchCountと異なる値になる。
         public String ReserveCount 
         {
             get
             {
-                return getItemCounts(itemCountsMode.Reserve).ToString();
-                //元クラスを変更する場合
-                //String view = "0";
-                //if (EpgAutoAddInfo != null)
-                //{
-                //    view = EpgAutoAddInfo.reserveCount.ToString(); 
-                //}
-                //return view;
+                String view = "0";
+                if (EpgAutoAddInfo != null)
+                {
+                    view = CommonManager.Instance.DB.GetEpgAutoAddDataAppend(EpgAutoAddInfo).ReserveCount.ToString();
+                }
+                return view;
             }
         }
+
         //"ReserveCount"のうち、有効な予約アイテム数
         public String OnCount
         {
             get
             {
-                return getItemCounts(itemCountsMode.On).ToString();
-                //元クラスを変更する場合
-                //元クラスで実装するなら、onCountなしで、reserveCount-offCountでもいいかも。
-                //String view = "0";
-                //if (EpgAutoAddInfo != null)
-                //{
-                //    view = EpgAutoAddInfo.onCount.ToString(); 
-                //}
-                //return view;
+                String view = "0";
+                if (EpgAutoAddInfo != null)
+                {
+                    view = CommonManager.Instance.DB.GetEpgAutoAddDataAppend(EpgAutoAddInfo).OnCount.ToString();
+                }
+                return view;
             }
         }
+
         //"ReserveCount"のうち、無効な予約アイテム数
         public String OffCount
         {
             get
             {
-                return getItemCounts(itemCountsMode.Off).ToString();
-                //元クラスを変更する場合
-                //String view = "0";
-                //if (EpgAutoAddInfo != null)
-                //{
-                //    view = EpgAutoAddInfo.offCount.ToString(); 
-                //}
-                //return view;
-            }
-        }
-
-        //以下はこのクラス内で実装する場合のコード
-        //NWでは重すぎてほぼ使い物にならない。
-        private bool isChange;
-        private uint[] itemCounts = new uint[] { 0, 0, 0, 0, 0 };
-        private enum itemCountsMode :byte 
-        {
-            /// <summary>登録数</summary>
-            Add=0,
-            /// <summary>検索数</summary>
-            Search,
-            /// <summary>予約数</summary>
-            Reserve,
-            /// <summary>有効予約数</summary>
-            On,
-            /// <summary>無効予約数</summary>
-            Off
-        }
-        private uint getItemCounts(itemCountsMode Mode=itemCountsMode.Add )
-        {
-            //範囲外
-            if ((int)Mode > itemCounts.Length)
-            {
-                return 0;
-            }
-
-            if (EpgAutoAddInfo == null)
-            {
-                return 0;
-            }
-
-            if (isChange == true)
-            {
-                itemCounts[(uint)itemCountsMode.Add] = EpgAutoAddInfo.addCount;
-                
-                List<SearchItem> itemlist = new List<SearchItem>();
-
-                //この関数の負荷がNWで高過ぎる。通信時間で相当待たされてしまう。
-                //列項目1個表示されるごとにEpgAutoDataItemが生成されるため、itemCountsでの保持も役に立たず。
-                //結果の数字だけ返すメソッドをcmdに追加して(通信量削減)、結果を外部保存すれば(通信回数削減)、
-                //待ち時間を10分の1くらいには出来そうだが‥そのくらいなら元クラスを変更した方がいいかも？
-                GetSearchItemList(ref itemlist); 
-
-                itemCounts[(int)itemCountsMode.Search] = (uint)itemlist.Count;
-
-                //自動予約が無効の時は、SearchCount≠OnCountなので両方カウントする
-                int OnCount = 0;
-                int OffCount = 0;
-                foreach (SearchItem item in itemlist)
+                String view = "0";
+                if (EpgAutoAddInfo != null)
                 {
-                    if (item.IsReserved == true)
-                    {
-                        if (item.ReserveInfo.RecSetting.RecMode == 5)
-                        {
-                            OffCount++;
-                        }
-                        else
-                        {
-                            OnCount++;
-                        }
-                    }
+                    view = CommonManager.Instance.DB.GetEpgAutoAddDataAppend(EpgAutoAddInfo).OffCount.ToString();
                 }
-                itemCounts[(int)itemCountsMode.Reserve ] = (uint)(OnCount+OffCount);
-                itemCounts[(int)itemCountsMode.On] = (uint)OnCount;
-                itemCounts[(int)itemCountsMode.Off] = (uint)OffCount;
+                return view;
             }
-
-            return itemCounts[(int)Mode];
         }
 
-        public void GetSearchItemList(ref List<SearchItem> itemlist)
+        public void GetSearchItemList(ref List<SearchItem> itemlist,bool ForceReload=true)
         {
-
             if (EpgAutoAddInfo == null) return;
 
-            CtrlCmdUtil cmd = CommonManager.Instance.CtrlCmd;
-
-            EpgSearchKeyInfo key = new EpgSearchKeyInfo();
-            EpgSearchKeyInfo key2 = this.EpgAutoAddInfo.searchInfo;
-            //代入すると参照コピーになり、「検索無効」が消去されてしまう。
-            //条件保存して後で復元するのは、エラー時に対応出来ないのでNG。
-            //何とも美しくないが。
-            key.aimaiFlag=key2.aimaiFlag;
-            key.andKey=key2.andKey;
-            key.audioList=key2.audioList;
-            key.chkRecDay=key2.chkRecDay;
-            key.chkRecEnd=key2.chkRecEnd;
-            key.contentList=key2.contentList;
-            key.dateList=key2.dateList;
-            key.freeCAFlag=key2.freeCAFlag;
-            key.notContetFlag=key2.notContetFlag;
-            key.notDateFlag=key2.notDateFlag;
-            key.notKey=key2.notKey;
-            key.regExpFlag=key2.regExpFlag;
-            key.serviceList=key2.serviceList;
-            key.titleOnlyFlag=key2.titleOnlyFlag;
-            key.videoList=key2.videoList;
-
-            key.andKey = key.andKey.Substring(key.andKey.StartsWith("^!{999}") ? 7 : 0);
-
-            List<EpgEventInfo> list = new List<EpgEventInfo>();
-            List<EpgSearchKeyInfo> keyList = new List<EpgSearchKeyInfo>();
-            keyList.Add(key);
-            
-            try
-            {
-                cmd.SendSearchPg(keyList, ref list);
-
-                foreach (EpgEventInfo info in list)
-                {
-                    SearchItem item = new SearchItem();
-                    item.EventInfo = info;
-
-                    if (info.start_time.AddSeconds(info.durationSec) > DateTime.Now)
-                    {
-                        //予約情報との突き合わせ
-                        foreach (ReserveData info2 in CommonManager.Instance.DB.ReserveList.Values)
-                        {
-                            if (info.original_network_id == info2.OriginalNetworkID &&
-                                info.transport_stream_id == info2.TransportStreamID &&
-                                info.service_id == info2.ServiceID &&
-                                info.event_id == info2.EventID)
-                            {
-                                item.ReserveInfo = info2;
-                                break;
-                            }
-                        }
-                        UInt64 serviceKey = CommonManager.Create64Key(info.original_network_id, info.transport_stream_id, info.service_id);
-                        if (ChSet5.Instance.ChList.ContainsKey(serviceKey) == true)
-                        {
-                            item.ServiceName = ChSet5.Instance.ChList[serviceKey].ServiceName;
-                        }
-
-                        //これはSearchWindow用の固有コードと考える
-                        //if (Settings.Instance.FixSearchResult)
-                        //{
-                        //    item.EventInfo.ShortInfo.text_char = "省略";
-                        //}
-
-                        itemlist.Add(item);
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.Message + "\r\n" + ex.StackTrace);
-            }
-
-            return;
-
+            EpgAutoAddDataAppend AppendData = CommonManager.Instance.DB.GetEpgAutoAddDataAppend(EpgAutoAddInfo);
+            itemlist = AppendData.SearchItemList(ForceReload);
         }
 
         public String JyanruKey
