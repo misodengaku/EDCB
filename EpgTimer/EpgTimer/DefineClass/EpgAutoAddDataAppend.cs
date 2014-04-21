@@ -11,20 +11,55 @@ namespace EpgTimer
 {
     public class EpgAutoAddDataAppend
     {
-        public EpgAutoAddDataAppend(EpgAutoAddData master1)
+        public EpgAutoAddDataAppend(EpgAutoAddData master1,bool LoadList=true)
         {
             master = master1;
-            RefreshData(true);
+            updateSearchItemList = LoadList;
 	    }
 
-        private uint onCount = 0;
-        private uint offCount = 0;
         private EpgAutoAddData master = null;
         private List<SearchItem> searchItemList = new List<SearchItem>();
+        private uint onCount = 0;
+        private uint offCount = 0;
 
-        public uint dataID { get { return (master != null ? master.dataID : 0); } }
-        public uint SearchCount { get { return (uint)searchItemList.Count; } }
-        public uint ReserveCount { get { return OnCount+OffCount; } }
+        public EpgAutoAddData Master
+        {
+            get 
+            { 
+                return master;
+            } 
+        }
+        public uint dataID
+        {
+            get
+            {
+                return (master != null ? master.dataID : 0);
+            }
+        }
+        public List<SearchItem> SearchItemList
+        { 
+            get 
+            {
+                RefreshData();
+                return searchItemList;
+            }
+        }
+        public uint SearchCount
+        { 
+            get 
+            {
+                RefreshData();
+                return (uint)searchItemList.Count;
+            }
+        }
+        public uint ReserveCount 
+        { 
+            get
+            {
+                RefreshData();
+                return onCount + offCount;
+            }
+        }
         public uint OnCount
         {
             get
@@ -43,30 +78,25 @@ namespace EpgTimer
         }
 
         //予約情報の更新があったとき、CommonManager.Instance.DB.epgAutoAddAppendList()に入っていればフラグを立ててもらえる。
-        public bool NeedRefreshCount = true;
+        public bool updateCounts = false;
 
-        public List<SearchItem> SearchItemList(bool ForceReload=false)
-        {
-            RefreshData(ForceReload);
-            return searchItemList;
-        }
+        //リストの更新が必要なとき。
+        public bool updateSearchItemList = false;
 
-        //情報の更新をする。
+        //必要なら情報の更新をする。
         //通常は、予約情報との突き合わせのみやり直す。
-        public void RefreshData(bool ForceReload=false)
+        private void RefreshData()
         {
             if (master == null) return;
 
-            if (ForceReload == true)
+            if (updateSearchItemList == true)
             {
-                searchItemList.Clear();
-                searchItemList = null;
-                searchItemList = new List<SearchItem>();
-                GetSearchItemList(ref searchItemList);
-                NeedRefreshCount = true;
+                ReloadSearchItemList();
+                //updateSearchItemList = false;
+                //updateCounts = true;
             }
 
-            if (NeedRefreshCount == false) return;
+            if (updateCounts == false) return;
 
             onCount = 0;
             offCount = 0;
@@ -102,17 +132,24 @@ namespace EpgTimer
                 }
             }
 
-            NeedRefreshCount = false;
+            updateCounts = false;
         }
 
-        private void GetSearchItemList(ref List<SearchItem> itemlist)
+        //区別付く形でSendSearchPg()がリストを返してきてくれたらいいのに
+        //public static void LoadSearchItemList(List<EpgAutoAddDataAppend> lists){}
+
+        private void ReloadSearchItemList()
         {
-            if (master == null) return;
+            if (this.master == null) return;
 
             CtrlCmdUtil cmd = CommonManager.Instance.CtrlCmd;
 
+            this.searchItemList.Clear();
+            this.searchItemList = null;
+            this.searchItemList = new List<SearchItem>();
+
             EpgSearchKeyInfo key = new EpgSearchKeyInfo();
-            EpgSearchKeyInfo key2 = master.searchInfo;
+            EpgSearchKeyInfo key2 = this.master.searchInfo;
             //「検索無効」の対応のため、コピーする。
             //CtrlCmdUtil.CopyData()が使えるかコピーコンストラクタでもあれば簡単だが
             key.aimaiFlag = key2.aimaiFlag;
@@ -148,17 +185,19 @@ namespace EpgTimer
 
                     if (info.start_time.AddSeconds(info.durationSec) > DateTime.Now)
                     {
-                        //予約情報との突き合わせは、呼び出し側で実施する。
-
                         UInt64 serviceKey = CommonManager.Create64Key(info.original_network_id, info.transport_stream_id, info.service_id);
                         if (ChSet5.Instance.ChList.ContainsKey(serviceKey) == true)
                         {
                             item.ServiceName = ChSet5.Instance.ChList[serviceKey].ServiceName;
                         }
 
-                        itemlist.Add(item);
+                        this.searchItemList.Add(item);
                     }
                 }
+
+                //予約情報との突き合わせは、必要時点で実施される。
+                this.updateCounts = true;
+                this.updateSearchItemList = false;
             }
             catch (Exception ex)
             {

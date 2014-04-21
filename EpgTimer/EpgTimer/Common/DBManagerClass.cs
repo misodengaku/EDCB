@@ -20,6 +20,8 @@ namespace EpgTimer
         private bool updatePlugInFile = true;
         private bool noAutoReloadEpg = false;
         private bool oneTimeReloadEpg = false;
+        private bool updateAutoAddAppendInfo = true;
+        private bool updateAutoAddAppendReserveInfo = true;
 
         Dictionary<UInt64, EpgServiceEventInfo> serviceEventList = new Dictionary<UInt64, EpgServiceEventInfo>();
         Dictionary<UInt32, ReserveData> reserveList = new Dictionary<UInt32, ReserveData>();
@@ -70,6 +72,33 @@ namespace EpgTimer
         public EpgAutoAddDataAppend GetEpgAutoAddDataAppend(EpgAutoAddData master)
         {
             if (master == null) return null;
+
+            //データ更新関係は、必要時のみ行う
+
+            //既にデータが古い場合
+            if (updateAutoAddAppendInfo == true)
+            {
+                epgAutoAddAppendList.Clear();
+                epgAutoAddAppendList = null;
+                epgAutoAddAppendList = new Dictionary<uint, EpgAutoAddDataAppend>();
+
+                //ここで、1回の通信により元のEpgSearchKeyInfoが区別出来る形でEpgEventInfoが取得できれば
+                //NWでも実用的な処理時間になるが、残念ながら今のcmd.SendSearchPg()は区別出来ない。
+                //もうEpgTimer側にある予約情報やEPGデータを自力検索するしかない？
+
+                updateAutoAddAppendInfo = false;
+            }
+
+            //予約情報との突き合わせが古い場合
+            if (updateAutoAddAppendReserveInfo == true)
+            {
+                foreach (EpgAutoAddDataAppend item in epgAutoAddAppendList.Values)
+                {
+                    item.updateCounts = true;
+                }
+
+                updateAutoAddAppendReserveInfo = false;
+            }
 
             if (epgAutoAddAppendList.ContainsKey(master.dataID) == false)
             {
@@ -283,10 +312,7 @@ namespace EpgTimer
                                     tunerReserveList.Add(info.tunerID, info);
                                 }
                                 updateReserveInfo = false;
-                                foreach (EpgAutoAddDataAppend item in epgAutoAddAppendList.Values)
-                                {  
-                                    item.NeedRefreshCount=true;
-                                }
+                                updateAutoAddAppendReserveInfo = true;
                             }
                         }
                         list.Clear();
@@ -430,7 +456,7 @@ namespace EpgTimer
                                 epgAutoAddList.Add(info.dataID, info);
                             }
                             updateAutoAddEpgInfo = false;
-                            ReloadEpgAutoAddAppendInfo();
+                            updateAutoAddAppendInfo = true;
                         }
                         list.Clear();
                         list = null;
@@ -442,17 +468,6 @@ namespace EpgTimer
                 MessageBox.Show(ex.Message + "\r\n" + ex.StackTrace);
             }
             return ret;
-        }
-
-        /// <summary>
-        /// 自動予約登録情報の更新時、追加情報の蓄積を破棄する
-        /// </summary>
-        /// <returns></returns>
-        private void ReloadEpgAutoAddAppendInfo()
-        {
-            epgAutoAddAppendList.Clear();
-            epgAutoAddAppendList = null;
-            epgAutoAddAppendList = new Dictionary<uint, EpgAutoAddDataAppend>();
         }
 
         /// <summary>

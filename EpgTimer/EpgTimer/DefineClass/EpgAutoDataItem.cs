@@ -241,14 +241,6 @@ namespace EpgTimer
             }
         }
 
-        public void GetSearchItemList(ref List<SearchItem> itemlist,bool ForceReload=true)
-        {
-            if (EpgAutoAddInfo == null) return;
-
-            EpgAutoAddDataAppend AppendData = CommonManager.Instance.DB.GetEpgAutoAddDataAppend(EpgAutoAddInfo);
-            itemlist = AppendData.SearchItemList(ForceReload);
-        }
-
         public String JyanruKey
         {
             get
