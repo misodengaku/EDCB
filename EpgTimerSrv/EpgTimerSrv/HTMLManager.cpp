@@ -6,8 +6,8 @@
 #include <functional>
 
 
-#define HTML_TOP "<HTML LANG=\"ja\">\r\n<HEAD>\r\n<META HTTP-EQUIV=\"Content-Type\" CONTENT=\"text/html;charset=Shift_JIS\">\r\n<TITLE>EpgTimer</TITLE>\r\n</HEAD>\r\n<BODY>\r\n"
-#define HTML_END "</BODY>\r\n</HTML>\r\n"
+#define HTML_TOP "<html lang=\"ja\">\r\n<head>\r\n<link href=\"http://ajax.aspnetcdn.com/ajax/bootstrap/3.1.1/css/bootstrap.css\" rel=\"stylesheet\">\r\n<script src=\"//ajax.googleapis.com/ajax/libs/jquery/2.1.0/jquery.min.js\"></script>\r\n<script src=\"http://ajax.aspnetcdn.com/ajax/bootstrap/3.1.1/bootstrap.min.js\"></script><META HTTP-EQUIV=\"Content-Type\" CONTENT=\"text/html;charset=Shift_JIS\">\r\n<title>EpgTimer</title>\r\n</head>\r\n<body>\r\n<div class=\"container\">"
+#define HTML_END "</div></BODY>\r\n</HTML>\r\n"
 
 CHTMLManager::CHTMLManager(void)
 {
@@ -297,7 +297,7 @@ void CHTMLManager::CreateRecSetForm(REC_SETTING_DATA* recSetData, vector<TUNER_R
 	htmlText+="<BR>\r\n";
 
 	htmlText+="録画フォルダ、使用プラグイン（プリセットによる変更のみ対応）:\r\n";
-	htmlText+="<TABLE BORDER=\"1\">\r\n";
+	htmlText+="<TABLE class=\"table\" BORDER=\"1\">\r\n";
 	htmlText+="<TR><TD>フォルダ</TD><TD>出力PlugIn</TD><TD>ファイル名PlugIn</TD></TR>\r\n";
 	string hiddenFolde="";
 	Format(hiddenFolde, "<input type=hidden name=\"recFolderCount\" value=\"%d\">\r\n", recSetData->recFolderList.size());
@@ -323,7 +323,7 @@ void CHTMLManager::CreateRecSetForm(REC_SETTING_DATA* recSetData, vector<TUNER_R
 	}
 	htmlText+="<BR>\r\n";
 	htmlText+="録画フォルダ、使用プラグイン（プリセットによる変更のみ対応）:\r\n";
-	htmlText+="<TABLE BORDER=\"1\">\r\n";
+	htmlText+="<TABLE class=\"table\" BORDER=\"1\">\r\n";
 	htmlText+="<TR><TD>フォルダ</TD><TD>出力PlugIn</TD><TD>ファイル名PlugIn</TD></TR>\r\n";
 	Format(hiddenFolde, "<input type=hidden name=\"partialFolderCount\" value=\"%d\">\r\n", recSetData->partialRecFolder.size());
 	for( size_t i=0; i<recSetData->partialRecFolder.size(); i++ ){
@@ -611,7 +611,7 @@ BOOL CHTMLManager::GetReservePage(vector<RESERVE_DATA*>* list, int pageIndex, HT
 				sortMap.insert(pair<__int64, RESERVE_DATA*>(stratTime, (*list)[i]));
 			}
 			//一覧の作成
-			html+="<TABLE BORDER=\"1\">\r\n";
+			html+="<TABLE class=\"table\" BORDER=\"1\">\r\n";
 
 			multimap<__int64, RESERVE_DATA*>::iterator itr;
 			itr = sortMap.begin();
@@ -991,7 +991,7 @@ BOOL CHTMLManager::GetRecInfoPage(vector<REC_FILE_INFO>* list, int pageIndex, HT
 				sortMap.insert(pair<__int64, REC_FILE_INFO>(stratTime, (*list)[i]));
 			}
 			//一覧の作成
-			html+="<TABLE BORDER=\"1\">\r\n";
+			html+="<TABLE class=\"table\" BORDER=\"1\">\r\n";
 
 			multimap<__int64, REC_FILE_INFO, std::greater<__int64>>::iterator itr;
 			itr = sortMap.begin();
@@ -1376,7 +1376,7 @@ BOOL CHTMLManager::CreateDefEpgPage(CEpgDBManager* epgDB, vector<RESERVE_DATA*>*
 	htmlText+="<BR><BR>\r\n";
 #if 0
 	//番組表本体
-	htmlText+="<TABLE cellpadding=\"0\" cellspacing=\"0\" border=\"0\">\r\n";
+	htmlText+="<TABLE class=\"table\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\">\r\n";
 	htmlText+="<TR><TD height=\"20px\" width=\"30px\" nowrap></TD>\r\n";
 	//サービス
 	for( size_t i=0; i<useServiceList.size(); i++ ){
@@ -1389,7 +1389,7 @@ BOOL CHTMLManager::CreateDefEpgPage(CEpgDBManager* epgDB, vector<RESERVE_DATA*>*
 
 	//時間
 	htmlText+="<TR><TD valign=\"top\" nowrap>";
-	htmlText+="<TABLE cellpadding=\"0\" cellspacing=\"0\" border=\"1\">\r\n";
+	htmlText+="<TABLE class=\"table\" cellpadding=\"0\" cellspacing=\"0\" border=\"1\">\r\n";
 	for( int i=4; i<28; i++ ){
 		Format(buff, "<TR><TD height=\"%dpx\" width=\"28px\" nowrap>%d</TD></TR>\r\n", minPx*60, i);
 		htmlText+=buff;
@@ -1420,7 +1420,7 @@ BOOL CHTMLManager::CreateDefEpgPage(CEpgDBManager* epgDB, vector<RESERVE_DATA*>*
 		}
 		//HTML作成
 		htmlText+="<TD valign=\"top\" rowspan=\"24\">\r\n";
-		htmlText+="<TABLE cellpadding=\"0\" cellspacing=\"0\" border=\"1\" style=\"table-layout:fixed;\">\r\n";
+		htmlText+="<TABLE class=\"table\" cellpadding=\"0\" cellspacing=\"0\" border=\"1\" style=\"table-layout:fixed;\">\r\n";
 		map<LONGLONG, EPGDB_EVENT_INFO*>::iterator itr;
 		LONGLONG lastEnd = chkStartTime;
 		for( itr = sortMap.begin(); itr != sortMap.end(); itr++ ){
@@ -1844,7 +1844,7 @@ BOOL CHTMLManager::CreateCustEpgPage(CEpgDBManager* epgDB, vector<RESERVE_DATA*>
 
 #if 0
 	//番組表本体
-	htmlText+="<TABLE cellpadding=\"0\" cellspacing=\"0\" border=\"0\">\r\n";
+	htmlText+="<TABLE class=\"table\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\">\r\n";
 	htmlText+="<TR><TD height=\"20px\" width=\"30px\" nowrap></TD>\r\n";
 	//サービス
 	for( size_t i=0; i<viewServiceList.size(); i++ ){
@@ -1862,7 +1862,7 @@ BOOL CHTMLManager::CreateCustEpgPage(CEpgDBManager* epgDB, vector<RESERVE_DATA*>
 
 	//時間
 	htmlText+="<TR><TD valign=\"top\" nowrap>";
-	htmlText+="<TABLE cellpadding=\"0\" cellspacing=\"0\" border=\"1\">\r\n";
+	htmlText+="<TABLE class=\"table\" cellpadding=\"0\" cellspacing=\"0\" border=\"1\">\r\n";
 	for( int i=4; i<28; i++ ){
 		Format(buff, "<TR><TD height=\"%dpx\" width=\"28px\" nowrap>%d</TD></TR>\r\n", minPx*60, i);
 		htmlText+=buff;
@@ -1892,7 +1892,7 @@ BOOL CHTMLManager::CreateCustEpgPage(CEpgDBManager* epgDB, vector<RESERVE_DATA*>
 		}
 		//HTML作成
 		htmlText+="<TD valign=\"top\" rowspan=\"24\">\r\n";
-		htmlText+="<TABLE cellpadding=\"0\" cellspacing=\"0\" border=\"1\" style=\"table-layout:fixed;\">\r\n";
+		htmlText+="<TABLE class=\"table\" cellpadding=\"0\" cellspacing=\"0\" border=\"1\" style=\"table-layout:fixed;\">\r\n";
 		map<LONGLONG, EPGDB_EVENT_INFO*>::iterator itr;
 		LONGLONG lastEnd = chkStartTime;
 		for( itr = sortMap.begin(); itr != sortMap.end(); itr++ ){
@@ -2735,13 +2735,15 @@ BOOL CHTMLManager::CreateHourTable(vector<EPGDB_EVENT_INFO*>* eventList, map<LON
 
 	string buff = "";
 	string tableBody = "";
-	eventTable->tableHtml+="<TABLE cellpadding=\"0\" cellspacing=\"0\" border=\"1\">\r\n";
+	eventTable->tableHtml+="<table name=\"hourTable\" class=\"table\">\r\n";
 
 	if( (*eventList)[0]->start_time.wMinute != 0 ){
 		//空白挿入
+		/*
 		int duration = (*eventList)[0]->start_time.wMinute;
 		Format(buff,"<tr><td valign=\"top\" height=\"%dpx\" width=\"148px\" bgcolor=#FFFFFF><font size=\"2\"><DIV style=\"height:%dpx; overflow:auto;\"></DIV></font></td></tr>\r\n", duration*minPx, duration*minPx);
-		eventTable->tableHtml+=buff;
+		eventTable->tableHtml+="<tr><td></td></tr>";
+		*/
 	}
 	LONGLONG lastEnd = ConvertI64Time((*eventList)[0]->start_time);
 	for( size_t i=0; i<eventList->size(); i++ ){
@@ -2754,10 +2756,13 @@ BOOL CHTMLManager::CreateHourTable(vector<EPGDB_EVENT_INFO*>* eventList, map<LON
 		}
 		if( lastEnd < evStartTime ){
 			//空白挿入
+			/*
 			int duration = (int)((evStartTime-lastEnd)/(60*I64_1SEC));
 			Format(buff,"<tr><td valign=\"top\" height=\"%dpx\" width=\"148px\" bgcolor=#FFFFFF><font size=\"2\"><DIV style=\"height:%dpx; overflow:auto;\"> </DIV></font></td></tr>\r\n", duration*minPx, duration*minPx);
 			eventTable->tableHtml+=buff;
+			eventTable->tableHtml += "<tr><td></td></tr>"; // もう意味不明
 			lastEnd = evEndTime;
+			*/
 		}
 		//イベント挿入
 		int height = (int)((evEndTime-evStartTime)/(60*I64_1SEC))*minPx;
@@ -2787,6 +2792,16 @@ BOOL CHTMLManager::CreateHourTable(vector<EPGDB_EVENT_INFO*>* eventList, map<LON
 			);
 		itrReserve = reserveMap->find(key);
 		if( itrReserve != reserveMap->end() ){
+			Format(buff, "<tr><td bgcolor=#%s>予 %02d <a href=\"epginfo.html?onid=%d&tsid=%d&sid=%d&evid=%d&presetID=65535\">%s</a></td></tr>",
+				color.c_str(),
+				info->start_time.wMinute,
+				info->original_network_id,
+				info->transport_stream_id,
+				info->service_id,
+				info->event_id,
+				title.c_str()
+				);
+			/*
 			Format(buff,"<tr><td valign=\"top\" height=\"%dpx\" width=\"148px\" bgcolor=#%s><font size=\"2\"><DIV style=\"height:%dpx; overflow:auto;\"><font color=#FF8000><B>予</B></font> %02d <a href=\"epginfo.html?onid=%d&tsid=%d&sid=%d&evid=%d&presetID=65535\">%s</a></DIV></font></td></tr>\r\n",
 				height,
 				color.c_str(),
@@ -2798,7 +2813,18 @@ BOOL CHTMLManager::CreateHourTable(vector<EPGDB_EVENT_INFO*>* eventList, map<LON
 				info->event_id,
 				title.c_str()
 				);
+			*/
 		}else{
+			Format(buff, "<tr><td bgcolor=#%s>%02d <a href=\"epginfo.html?onid=%d&tsid=%d&sid=%d&evid=%d&presetID=65535\">%s</a></td></tr>",
+				color.c_str(),
+				info->start_time.wMinute,
+				info->original_network_id,
+				info->transport_stream_id,
+				info->service_id,
+				info->event_id,
+				title.c_str()
+				);
+			/*
 			Format(buff,"<tr><td valign=\"top\" height=\"%dpx\" width=\"148px\" bgcolor=#%s><font size=\"2\"><DIV style=\"height:%dpx; overflow:auto;\">%02d <a href=\"epginfo.html?onid=%d&tsid=%d&sid=%d&evid=%d&presetID=0\">%s</a></DIV></font></td></tr>\r\n",
 				height,
 				color.c_str(),
@@ -2810,6 +2836,7 @@ BOOL CHTMLManager::CreateHourTable(vector<EPGDB_EVENT_INFO*>* eventList, map<LON
 				info->event_id,
 				title.c_str()
 				);
+			*/
 		}
 
 		eventTable->tableHtml+=buff;
@@ -2823,13 +2850,14 @@ BOOL CHTMLManager::CreateEpgMainTable(CEpgDBManager* epgDB, vector<LONGLONG>* vi
 {
 	string buff;
 	//番組表本体
-	htmlText+="<TABLE cellpadding=\"0\" cellspacing=\"0\" border=\"0\">\r\n";
+	htmlText+="<table class=\"table table-striped table-bordered\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\">\r\n";
 
 	//サービス
-	htmlText+="<TR>\r\n";
+	htmlText += "<thead><tr>";
+	//htmlText+="<TR>\r\n";
 	for( size_t i=0; i<viewServiceList->size(); i++ ){
 		if( (i%timeColumn) == 0 ){
-			htmlText+="<TD height=\"20px\" width=\"30px\" nowrap></TD>\r\n";
+			htmlText+="<td></td>\r\n";
 		}
 		string service;
 		wstring serviceName;
@@ -2838,14 +2866,15 @@ BOOL CHTMLManager::CreateEpgMainTable(CEpgDBManager* epgDB, vector<LONGLONG>* vi
 		WORD sid = (WORD)((*viewServiceList)[i]&0x000000000000FFFF);
 		epgDB->SearchServiceName(onid, tsid, sid, serviceName);
 		WtoA(serviceName, service);
-		Format(buff, "<TD height=\"20px\" width=\"150px\" nowrap><TABLE height=\"20px\" width=\"150px\" cellpadding=\"0\" cellspacing=\"0\" border=\"1\"><TR><TD>%s</TD></TR></TABLE></TD>\r\n", service.c_str());
+		Format(buff, "<td>%s</td>\r\n", service.c_str());
 		htmlText+=buff;
 	}
-	htmlText+="</TR>\r\n";
+	htmlText+="</tr></thead>\r\n";
 
 	map<LONGLONG, TIME_TABLE>::iterator itrTime;
 
 	//番組＋時間
+	htmlText += "<tbody>\r\n";
 	for( itrTime = timeMap->begin(); itrTime != timeMap->end(); itrTime++ ){
 		htmlText+="<TR>\r\n";
 		for( size_t j=0; j<itrTime->second.eventTableList.size(); j++ ){
@@ -2855,11 +2884,12 @@ BOOL CHTMLManager::CreateEpgMainTable(CEpgDBManager* epgDB, vector<LONGLONG>* vi
 					hour+=24;
 				}
 				int height = minPx*60;
-
-				Format(buff, "<TD valign=\"top\" height=\"%dpx\" width=\"30px\" nowrap><TABLE height=\"100%%\" width=\"30px\" cellpadding=\"0\" cellspacing=\"0\" border=\"1\"><TR><TD>%d</TD></TR></TABLE></TD>\r\n", height, hour);
+				Format(buff, "<td>%d</td>\r\n", hour);
+				//Format(buff, "<TD valign=\"top\" height=\"%dpx\" width=\"30px\" nowrap><TABLE class=\"table\" height=\"100%%\" width=\"30px\" cellpadding=\"0\" cellspacing=\"0\" border=\"1\"><TR><TD>%d</TD></TR></TABLE></TD>\r\n", height, hour);
 				htmlText+=buff;
 			}
 			if( itrTime->second.eventTableList[j].tableHtml.size() > 0 ){
+				/*
 				int height = minPx*60*(itrTime->second.eventTableList[j].rowspan);
 				int width = 150*(itrTime->second.eventTableList[j].colspan);
 				Format(buff, "<TD valign=\"top\" height=\"%dpx\" width=\"%dpx\" rowspan=\"%d\" colspan=\"%d\" nowrap>\r\n%s</TD>\r\n",
@@ -2867,11 +2897,14 @@ BOOL CHTMLManager::CreateEpgMainTable(CEpgDBManager* epgDB, vector<LONGLONG>* vi
 					itrTime->second.eventTableList[j].rowspan,
 					itrTime->second.eventTableList[j].colspan,
 					itrTime->second.eventTableList[j].tableHtml.c_str());
+				*/
+				Format(buff, "<td>%s</td>", itrTime->second.eventTableList[j].tableHtml.c_str());
 				htmlText+=buff;
 			}
 		}
-		htmlText+="</TR>\r\n";
+		htmlText+="</tr>\r\n";
 	}
+	htmlText += "</tbody>";
 
 	//サービス
 	htmlText+="<TR>\r\n";
@@ -2886,7 +2919,7 @@ BOOL CHTMLManager::CreateEpgMainTable(CEpgDBManager* epgDB, vector<LONGLONG>* vi
 		WORD sid = (WORD)((*viewServiceList)[i]&0x000000000000FFFF);
 		epgDB->SearchServiceName(onid, tsid, sid, serviceName);
 		WtoA(serviceName, service);
-		Format(buff, "<TD height=\"20px\" width=\"150px\" nowrap><TABLE height=\"20px\" width=\"150px\" cellpadding=\"0\" cellspacing=\"0\" border=\"1\"><TR><TD>%s</TD></TR></TABLE></TD>\r\n", service.c_str());
+		Format(buff, "<TD height=\"20px\" width=\"150px\" nowrap><TABLE class=\"table\" height=\"20px\" width=\"150px\" cellpadding=\"0\" cellspacing=\"0\" border=\"1\"><TR><TD>%s</TD></TR></TABLE></TD>\r\n", service.c_str());
 		htmlText+=buff;
 	}
 	htmlText+="</TR>\r\n";
@@ -2900,25 +2933,26 @@ BOOL CHTMLManager::CreateEpgWeekTable(vector<string>* dateList, map<LONGLONG, TI
 {
 	string buff;
 	//番組表本体
-	htmlText+="<TABLE cellpadding=\"0\" cellspacing=\"0\" border=\"0\">\r\n";
+	htmlText+="<TABLE class=\"table\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\">\r\n";
 
 	//日付
-	htmlText+="<TR>\r\n";
+	htmlText+="<tr>\r\n";
 	for( size_t i=0; i<dateList->size(); i++ ){
 		if( (i%timeColumn) == 0 ){
-			htmlText+="<TD height=\"20px\" width=\"30px\" nowrap></TD>\r\n";
+			htmlText+="<td></td>\r\n";
 		}
 
-		Format(buff, "<TD height=\"20px\" width=\"150px\" nowrap><TABLE height=\"20px\" width=\"150px\" cellpadding=\"0\" cellspacing=\"0\" border=\"1\"><TR><TD>%s</TD></TR></TABLE></TD>\r\n", (*dateList)[i].c_str());
+		//Format(buff, "<TD height=\"20px\" width=\"150px\" nowrap><TABLE class=\"table\" height=\"20px\" width=\"150px\" cellpadding=\"0\" cellspacing=\"0\" border=\"1\"><TR><TD>%s</TD></TR></TABLE></TD>\r\n", (*dateList)[i].c_str());
+		Format(buff, "<td>%s</td>", (*dateList)[i].c_str());
 		htmlText+=buff;
 	}
-	htmlText+="</TR>\r\n";
+	htmlText+="</tr>\r\n";
 
 	map<LONGLONG, TIME_TABLE>::iterator itrTime;
 
 	//番組＋時間
 	for( itrTime = timeMap->begin(); itrTime != timeMap->end(); itrTime++ ){
-		htmlText+="<TR>\r\n";
+		htmlText+="<tr>\r\n";
 		for( size_t j=0; j<itrTime->second.eventTableList.size(); j++ ){
 			if( j%timeColumn == 0 ){
 				WORD hour = itrTime->second.timeInfo.wHour;
@@ -2927,7 +2961,7 @@ BOOL CHTMLManager::CreateEpgWeekTable(vector<string>* dateList, map<LONGLONG, TI
 				}
 				int height = minPx*60;
 
-				Format(buff, "<TD valign=\"top\" height=\"%dpx\" width=\"30px\" nowrap><TABLE height=\"100%%\" width=\"30px\" cellpadding=\"0\" cellspacing=\"0\" border=\"1\"><TR><TD>%d</TD></TR></TABLE></TD>\r\n", height, hour);
+				Format(buff, "<TD valign=\"top\" height=\"%dpx\" width=\"30px\" nowrap><TABLE class=\"table\" height=\"100%%\" width=\"30px\" cellpadding=\"0\" cellspacing=\"0\" border=\"1\"><TR><TD>%d</TD></TR></TABLE></TD>\r\n", height, hour);
 				htmlText+=buff;
 			}
 			if( itrTime->second.eventTableList[j].tableHtml.size() > 0 ){
@@ -2951,7 +2985,7 @@ BOOL CHTMLManager::CreateEpgWeekTable(vector<string>* dateList, map<LONGLONG, TI
 			htmlText+="<TD height=\"20px\" width=\"30px\" nowrap></TD>\r\n";
 		}
 
-		Format(buff, "<TD height=\"20px\" width=\"150px\" nowrap><TABLE height=\"20px\" width=\"150px\" cellpadding=\"0\" cellspacing=\"0\" border=\"1\"><TR><TD>%s</TD></TR></TABLE></TD>\r\n", (*dateList)[i].c_str());
+		Format(buff, "<TD height=\"20px\" width=\"150px\" nowrap><TABLE class=\"table\" height=\"20px\" width=\"150px\" cellpadding=\"0\" cellspacing=\"0\" border=\"1\"><TR><TD>%s</TD></TR></TABLE></TD>\r\n", (*dateList)[i].c_str());
 		htmlText+=buff;
 	}
 	htmlText+="</TR>\r\n";
@@ -3513,7 +3547,7 @@ BOOL CHTMLManager::GetAutoAddEpgPage(vector<EPG_AUTO_ADD_DATA>* val, int pageInd
 			html +="<A HREF=\"autoaddepgadd.html\">新規追加</A><BR><BR>\r\n";
 
 			//一覧の作成
-			html+="<TABLE BORDER=\"1\">\r\n";
+			html+="<TABLE class=\"table\" BORDER=\"1\">\r\n";
 			int maxCount = (pageIndex+1)*pageCount;
 			if( (int)val->size() < maxCount ){
 				maxCount = (int)val->size();
