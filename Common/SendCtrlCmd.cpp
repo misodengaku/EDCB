@@ -13,7 +13,7 @@ CSendCtrlCmd::CSendCtrlCmd(void)
 	WSAData wsaData;
 	WSAStartup(MAKEWORD(2,0), &wsaData);
 
-	this->lockEvent = _CreateEvent(FALSE, TRUE, NULL);
+	this->lockEvent = CreateEvent(NULL, FALSE, TRUE, NULL);
 
 	this->tcpFlag = FALSE;
 	this->connectTimeOut = CONNECT_TIMEOUT;
@@ -81,13 +81,28 @@ void CSendCtrlCmd::SetSendMode(
 // eventName	[IN]排他制御用Eventの名前
 // pipeName		[IN]接続パイプの名前
 void CSendCtrlCmd::SetPipeSetting(
-	wstring eventName,
-	wstring pipeName
+	LPCWSTR eventName,
+	LPCWSTR pipeName
 	)
 {
 	if( Lock() == FALSE ) return ;
 	this->eventName = eventName;
 	this->pipeName = pipeName;
+	UnLock();
+}
+
+//名前付きパイプモード時の接続先を設定（接尾にプロセスIDを伴うタイプ）
+//引数：
+// pid			[IN]プロセスID
+void CSendCtrlCmd::SetPipeSetting(
+	LPCWSTR eventName,
+	LPCWSTR pipeName,
+	DWORD pid
+	)
+{
+	if( Lock() == FALSE ) return ;
+	Format(this->eventName, L"%s%d", eventName, pid);
+	Format(this->pipeName, L"%s%d", pipeName, pid);
 	UnLock();
 }
 

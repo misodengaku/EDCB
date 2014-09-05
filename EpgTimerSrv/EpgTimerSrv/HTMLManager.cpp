@@ -439,9 +439,9 @@ void CHTMLManager::CreateSearchSetForm(EPGDB_SEARCH_KEY_INFO* setData, CParseChT
 	}
 	htmlText += "<BR><BR>\r\n";
 
-	map<LONGLONG, CH_DATA5>::iterator itrCh;
+	map<LONGLONG, CH_DATA5>::const_iterator itrCh;
 	htmlText += "サービス絞り込み\r\n<BR><select name=\"serviceList\" multiple size=5>\r\n";
-	for (itrCh = chSet5->chList.begin(); itrCh != chSet5->chList.end(); itrCh++){
+	for(itrCh = chSet5->GetMap().begin(); itrCh != chSet5->GetMap().end(); itrCh++ ){
 		string select = "";
 		for (size_t j = 0; j < setData->serviceList.size(); j++){
 			if (itrCh->first == setData->serviceList[j]){
@@ -1415,9 +1415,9 @@ BOOL CHTMLManager::CreateDefEpgPage(CEpgDBManager* epgDB, vector<RESERVE_DATA*>*
 	vector<LONGLONG> viewServiceList;
 	LONGLONG startTime = 0;
 	LONGLONG endTime = 0;
-	for (size_t i = 0; i < useServiceList.size(); i++){
-		vector<EPGDB_EVENT_INFO*> eventList;
-		LONGLONG key = _Create64Key(useServiceList[i].ONID, useServiceList[i].TSID, useServiceList[i].SID);
+	for( size_t i = 0; i < useServiceList.size(); i++ ){
+		vector<unique_ptr<EPGDB_EVENT_INFO>> eventList;
+		LONGLONG key = _Create64Key(useServiceList[i].ONID, useServiceList[i].TSID, useServiceList[i].SID); 
 		viewServiceList.push_back(key);
 		epgDB->EnumEventInfo(key, &eventList);
 		for (size_t j = 0; j < eventList.size(); j++){
@@ -1596,14 +1596,14 @@ BOOL CHTMLManager::CreateDefEpgPage(CEpgDBManager* epgDB, vector<RESERVE_DATA*>*
 	LONGLONG chkEndTime = chkStartTime + 24 * 60 * 60 * I64_1SEC;
 	for (size_t i = 0; i < useServiceList.size(); i++){
 		//必要な物抽出
-		vector<EPGDB_EVENT_INFO*> eventList;
-		LONGLONG key = _Create64Key(useServiceList[i].ONID, useServiceList[i].TSID, useServiceList[i].SID);
+		vector<unique_ptr<EPGDB_EVENT_INFO>> eventList;
+		LONGLONG key = _Create64Key(useServiceList[i].ONID, useServiceList[i].TSID, useServiceList[i].SID); 
 		epgDB->EnumEventInfo(key, &eventList);
 		map<LONGLONG, EPGDB_EVENT_INFO*> sortMap;
 		for (size_t j = 0; j < eventList.size(); j++){
 			LONGLONG chk = ConvertI64Time(eventList[j]->start_time);
-			if (chkStartTime <= chk && chk < chkEndTime){
-				sortMap.insert(pair<LONGLONG, EPGDB_EVENT_INFO*>(chk, eventList[j]));
+			if( chkStartTime <= chk && chk < chkEndTime ){
+				sortMap.insert(pair<LONGLONG, EPGDB_EVENT_INFO*>(chk, eventList[j].get()));
 			}
 		}
 
@@ -1872,7 +1872,7 @@ BOOL CHTMLManager::CreateCustEpgPage(CEpgDBManager* epgDB, vector<RESERVE_DATA*>
 	LONGLONG startTime = 0;
 	LONGLONG endTime = 0;
 	for (size_t i = 0; i < viewServiceList.size(); i++){
-		vector<EPGDB_EVENT_INFO*> eventList;
+		vector<unique_ptr<EPGDB_EVENT_INFO>> eventList;
 		epgDB->EnumEventInfo(viewServiceList[i], &eventList);
 		for (size_t j = 0; j<eventList.size(); j++){
 			if (contentMap.size() > 0){
@@ -2108,7 +2108,7 @@ BOOL CHTMLManager::CreateCustEpgPage(CEpgDBManager* epgDB, vector<RESERVE_DATA*>
 
 		if (useServiceList.size() > 0){
 			//必要な物抽出
-			vector<EPGDB_EVENT_INFO*> eventList;
+			vector<unique_ptr<EPGDB_EVENT_INFO>> eventList;
 			epgDB->EnumEventInfo(useServiceList[0], &eventList);
 			map<LONGLONG, EPGDB_EVENT_INFO*> sortMap;
 			for (size_t j = 0; j<eventList.size(); j++){
@@ -2133,7 +2133,7 @@ BOOL CHTMLManager::CreateCustEpgPage(CEpgDBManager* epgDB, vector<RESERVE_DATA*>
 				}
 
 				LONGLONG chk = ConvertI64Time(eventList[j]->start_time);
-				sortMap.insert(pair<LONGLONG, EPGDB_EVENT_INFO*>(chk, eventList[j]));
+				sortMap.insert(pair<LONGLONG, EPGDB_EVENT_INFO*>(chk, eventList[j].get()));
 			}
 
 			int columPos = 0;
@@ -2286,7 +2286,7 @@ BOOL CHTMLManager::CreateCustEpgPage(CEpgDBManager* epgDB, vector<RESERVE_DATA*>
 
 		for (size_t i = 0; i < useServiceList.size(); i++){
 			//必要な物抽出
-			vector<EPGDB_EVENT_INFO*> eventList;
+			vector<unique_ptr<EPGDB_EVENT_INFO>> eventList;
 			epgDB->EnumEventInfo(useServiceList[i], &eventList);
 			map<LONGLONG, EPGDB_EVENT_INFO*> sortMap;
 			for (size_t j = 0; j<eventList.size(); j++){
@@ -2311,8 +2311,8 @@ BOOL CHTMLManager::CreateCustEpgPage(CEpgDBManager* epgDB, vector<RESERVE_DATA*>
 				}
 
 				LONGLONG chk = ConvertI64Time(eventList[j]->start_time);
-				if (chkStartTime <= chk && chk < chkEndTime){
-					sortMap.insert(pair<LONGLONG, EPGDB_EVENT_INFO*>(chk, eventList[j]));
+				if( chkStartTime <= chk && chk < chkEndTime ){
+					sortMap.insert(pair<LONGLONG, EPGDB_EVENT_INFO*>(chk, eventList[j].get()));
 				}
 			}
 
@@ -2469,14 +2469,14 @@ BOOL CHTMLManager::GetEpgInfoPage(CEpgDBManager* epgDB, vector<RESERVE_DATA*>* r
 		}
 	}
 
-	EPGDB_EVENT_INFO* eventInfo;
-	if (epgDB->SearchEpg(onid, tsid, sid, evid, &eventInfo) == FALSE){
+	EPGDB_EVENT_INFO eventInfo;
+	if( epgDB->SearchEpg(onid, tsid, sid, evid, &eventInfo) == FALSE ){
 		return FALSE;
 	}
 	wstring serviceName;
 	epgDB->SearchServiceName(onid, tsid, sid, serviceName);
 	wstring eventText;
-	_ConvertEpgInfoText2(eventInfo, eventText, serviceName);
+	_ConvertEpgInfoText2(&eventInfo, eventText, serviceName);
 	string buff;
 	WtoA(eventText, buff);
 
@@ -2648,27 +2648,26 @@ BOOL CHTMLManager::GetAddReserveData(CEpgDBManager* epgDB, RESERVE_DATA* reserve
 	if (itr != paramMap.end()){
 		evid = (WORD)atoi(itr->second.c_str());
 	}
-
-	EPGDB_EVENT_INFO* eventInfo;
-	if (epgDB->SearchEpg(onid, tsid, sid, evid, &eventInfo) == FALSE){
+	EPGDB_EVENT_INFO eventInfo;
+	if( epgDB->SearchEpg(onid, tsid, sid, evid, &eventInfo) == FALSE ){
 		return FALSE;
 	}
-	if (eventInfo->shortInfo != NULL){
-		reserveData->title = eventInfo->shortInfo->event_name;
+	if( eventInfo.shortInfo != NULL ){
+		reserveData->title = eventInfo.shortInfo->event_name;
 	}
-	reserveData->startTime = eventInfo->start_time;
-	reserveData->startTimeEpg = eventInfo->start_time;
-	reserveData->durationSecond = eventInfo->durationSec;
+	reserveData->startTime = eventInfo.start_time;
+	reserveData->startTimeEpg = eventInfo.start_time;
+	reserveData->durationSecond = eventInfo.durationSec;
 	epgDB->SearchServiceName(
-		eventInfo->original_network_id,
-		eventInfo->transport_stream_id,
-		eventInfo->service_id,
+		eventInfo.original_network_id,
+		eventInfo.transport_stream_id,
+		eventInfo.service_id,
 		reserveData->stationName
 		);
-	reserveData->originalNetworkID = eventInfo->original_network_id;
-	reserveData->transportStreamID = eventInfo->transport_stream_id;
-	reserveData->serviceID = eventInfo->service_id;
-	reserveData->eventID = eventInfo->event_id;
+	reserveData->originalNetworkID = eventInfo.original_network_id;
+	reserveData->transportStreamID = eventInfo.transport_stream_id;
+	reserveData->serviceID = eventInfo.service_id;
+	reserveData->eventID = eventInfo.event_id;
 
 	itr = paramMap.find("presetID");
 	if (itr == paramMap.end()){
@@ -3223,10 +3222,10 @@ BOOL CHTMLManager::GetAddProgramReservePage(CEpgDBManager* epgDB, vector<TUNER_R
 	chSet5.ParseText(chSet5Path.c_str());
 
 	html += "サービス\r\n<select name=\"serviceID\">\r\n";
-	map<LONGLONG, CH_DATA5>::iterator itrCh;
-	for (itrCh = chSet5.chList.begin(); itrCh != chSet5.chList.end(); itrCh++){
-		if (itrCh->second.serviceType == 0x01 || itrCh->second.serviceType == 0xA5){
-			__int64 key = _Create64Key(itrCh->second.originalNetworkID, itrCh->second.transportStreamID, itrCh->second.serviceID);
+	map<LONGLONG, CH_DATA5>::const_iterator itrCh;
+	for(itrCh = chSet5.GetMap().begin(); itrCh != chSet5.GetMap().end(); itrCh++ ){
+		if( itrCh->second.serviceType == 0x01 || itrCh->second.serviceType == 0xA5 ){
+			__int64 key = _Create64Key(itrCh->second.originalNetworkID,itrCh->second.transportStreamID, itrCh->second.serviceID);
 			string name;
 			WtoA(itrCh->second.serviceName, name);
 			if (itrCh->second.originalNetworkID == 0x04){
@@ -3488,9 +3487,9 @@ BOOL CHTMLManager::GetAddReservePgData(CEpgDBManager* epgDB, RESERVE_DATA* reser
 		CHAR *endstr;
 		chID = _strtoi64(itr->second.c_str(), &endstr, 10);
 	}
-	map<LONGLONG, CH_DATA5>::iterator itrCh;
-	itrCh = chSet5.chList.find(chID);
-	if (itrCh == chSet5.chList.end()){
+	map<LONGLONG, CH_DATA5>::const_iterator itrCh;
+	itrCh = chSet5.GetMap().find(chID);
+	if( itrCh == chSet5.GetMap().end()){
 		return FALSE;
 	}
 
@@ -3744,10 +3743,10 @@ BOOL CHTMLManager::GetAutoAddEpgPage(vector<EPG_AUTO_ADD_DATA>* val, int pageInd
 				}
 
 
-				if ((*val)[i].searchInfo.serviceList.size() > 0){
-					map<LONGLONG, CH_DATA5>::iterator itrCh;
-					itrCh = chSet5.chList.find((*val)[i].searchInfo.serviceList[0]);
-					if (itrCh != chSet5.chList.end()){
+				if( (*val)[i].searchInfo.serviceList.size() > 0 ){
+					map<LONGLONG, CH_DATA5>::const_iterator itrCh;
+					itrCh = chSet5.GetMap().find((*val)[i].searchInfo.serviceList[0]);
+					if( itrCh != chSet5.GetMap().end()){
 						WtoA(itrCh->second.serviceName, service);
 					}
 					if ((*val)[i].searchInfo.serviceList.size() > 1){
