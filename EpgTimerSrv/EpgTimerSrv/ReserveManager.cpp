@@ -3854,16 +3854,19 @@ BOOL CReserveManager::_IsSuspendOK(BOOL rebootFlag)
 
 BOOL CReserveManager::IsFindNoSuspendExe()
 {
-	OSVERSIONINFO VerInfo;
-	VerInfo.dwOSVersionInfoSize = sizeof(OSVERSIONINFO);
-	GetVersionEx( &VerInfo );
+	OSVERSIONINFOEX VerInfoEx;
+	LONGLONG cmpMask = 0;
+	BOOL b2000;
 
-	BOOL b2000 = FALSE;
-	if( VerInfo.dwMajorVersion == 5 && VerInfo.dwMinorVersion == 0 ){
-		b2000 = TRUE;
-	}else{
-		b2000 = FALSE;
-	}
+	cmpMask = VerSetConditionMask(cmpMask, VER_MAJORVERSION, VER_EQUAL);
+	cmpMask = VerSetConditionMask(cmpMask, VER_MINORVERSION, VER_EQUAL);
+
+	VerInfoEx.dwOSVersionInfoSize = sizeof(OSVERSIONINFOEX);
+	VerInfoEx.dwMajorVersion = 5;
+	VerInfoEx.dwMinorVersion = 0;
+
+	b2000 = VerifyVersionInfo(&VerInfoEx, VER_MAJORVERSION | VER_MINORVERSION, cmpMask);
+
 
 	HANDLE hSnapshot;
 	PROCESSENTRY32 procent;
